@@ -411,7 +411,13 @@ const int max_iov_len = IOV_MAX;
 // POSIX platforms are not required to define IOV_MAX.
 const int max_iov_len = 16;
 # endif
-# define ASIO_OS_DEF_SA_RESTART SA_RESTART
+// Note: QNX does not support SA_RESTART
+// Therefore they are specifically excluded here.
+# if defined(__QNX__)
+#  define ASIO_OS_DEF_SA_RESTART 0
+# else
+#  define ASIO_OS_DEF_SA_RESTART SA_RESTART
+# endif
 # define ASIO_OS_DEF_SA_NOCLDSTOP SA_NOCLDSTOP
 # define ASIO_OS_DEF_SA_NOCLDWAIT SA_NOCLDWAIT
 #endif

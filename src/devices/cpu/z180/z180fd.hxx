@@ -283,7 +283,11 @@ OP(fd,f6) { illegal_1(); op_f6();                                   } /* DB   FD
 OP(fd,f7) { illegal_1(); op_f7();                                   } /* DB   FD          */
 
 OP(fd,f8) { illegal_1(); op_f8();                                   } /* DB   FD          */
+#ifndef __QNX__
 OP(fd,f9) { m_R++; _SP = _IY;                                       } /* LD   SP,IY       */
+#else
+OP(fd,f9) { m_R++; MAME_SP = _IY;                                       } /* LD   SP,IY       */
+#endif
 OP(fd,fa) { illegal_1(); op_fa();                                   } /* DB   FD          */
 OP(fd,fb) { illegal_1(); op_fb();                                   } /* DB   FD          */
 OP(fd,fc) { illegal_1(); op_fc();                                   } /* DB   FD          */

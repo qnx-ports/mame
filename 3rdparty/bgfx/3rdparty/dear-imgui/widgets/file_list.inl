@@ -18,6 +18,53 @@ namespace ImGui
 	{
 #if BX_PLATFORM_PS4
 		BX_UNUSED(path);
+#elif BX_PLATFORM_QNX
+		DIR* dir = opendir(path);
+		if (NULL != dir)
+		{
+			FileList.clear();
+
+			for (dirent* item = readdir(dir); NULL != item; item = readdir(dir))
+			{
+                if (0 == ImStricmp(item->d_name, "..") )
+                {
+                    FileList.push_back(ImFileInfo(item->d_name, -1) );
+                }
+                else if (0 != ImStricmp(item->d_name, ".") )
+                {
+                    struct dirent_extra *dex;
+
+                    for (dex = _DEXTRA_FIRST(item); _DEXTRA_VALID(dex, item);
+                         dex = _DEXTRA_NEXT(dex))
+                    {
+                        struct dirent_extra_stat *dex_stat;
+                        struct stat statbuf;
+
+                        switch(dex->d_type)
+                        {
+                        case _DTYPE_STAT:
+                        case _DTYPE_LSTAT:
+                            dex_stat = (struct dirent_extra_stat *) dex;
+                            statbuf = dex_stat->d_stat;
+
+                            if ((statbuf.st_mode & S_IFDIR) == S_IFDIR)
+                            {
+                                FileList.push_back(ImFileInfo(item->d_name, -1) );
+                            }
+                            else
+                            {
+                                FileList.push_back(ImFileInfo(item->d_name, statbuf.st_size) );
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                }
+			}
+
+			closedir(dir);
+		}
 #else
 		DIR* dir = opendir(path);
 		if (NULL != dir)

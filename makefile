@@ -116,6 +116,8 @@
 # IGNORE_BAD_LOCALISATION = 1
 # PRECOMPILE = 0
 
+# JLEVEL = 1
+
 # DEBUG_DIR=c:\test\location
 # DEBUG_ARGS= -window -video bgfx
 
@@ -259,6 +261,10 @@ else # MINGW64
 	MINGW := $(MINGW32)
 endif # MINGW64
 endif # MSYSTEM
+
+ifndef JLEVEL
+JLEVEL := 1
+endif
 
 #-------------------------------------------------
 # specify core target: mame, ldplayer
@@ -1236,18 +1242,38 @@ $(PROJECTDIR)/$(MAKETYPE)-linux/Makefile: makefile $(SCRIPTS) $(GENIE)
 
 .PHONY: linux_x64
 linux_x64: generate $(PROJECTDIR)/$(MAKETYPE)-linux/Makefile
-	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)64 precompile
-	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)64
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)64 precompile -j$(JLEVEL)
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)64 -j$(JLEVEL)
 
 .PHONY: linux_x86
 linux_x86: generate $(PROJECTDIR)/$(MAKETYPE)-linux/Makefile
-	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)32 precompile
-	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)32
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)32 precompile -j$(JLEVEL)
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)32 -j$(JLEVEL)
 
 .PHONY: linux
 linux: generate $(PROJECTDIR)/$(MAKETYPE)-linux/Makefile
-	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG) precompile
-	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG)
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG) precompile -j$(JLEVEL)
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-linux config=$(CONFIG) -j$(JLEVEL)
+
+#-------------------------------------------------
+# gmake-qnx
+#-------------------------------------------------
+
+$(PROJECTDIR)/$(MAKETYPE)-nto-x86_64-o/Makefile: makefile $(SCRIPTS) $(GENIE)
+	$(SILENT) $(GENIE) $(PARAMS) $(TARGET_PARAMS) --gcc=qnx-x64 --gcc_version=12.2.0 $(MAKETYPE)
+
+$(PROJECTDIR)/$(MAKETYPE)-nto-aarch64-le/Makefile: makefile $(SCRIPTS) $(GENIE)
+	$(SILENT) $(GENIE) $(PARAMS) $(TARGET_PARAMS) --gcc=qnx-arm64 --gcc_version=12.2.0 $(MAKETYPE)
+
+.PHONY: qnx_x64
+qnx_x64: generate $(PROJECTDIR)/$(MAKETYPE)-nto-x86_64-o/Makefile
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-nto-x86_64-o config=$(CONFIG)64 precompile -j$(JLEVEL)
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-nto-x86_64-o config=$(CONFIG)64 -j$(JLEVEL)
+
+.PHONY: qnx_arm64
+qnx_arm64: generate $(PROJECTDIR)/$(MAKETYPE)-nto-aarch64-le/Makefile
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-nto-aarch64-le config=$(CONFIG)64 precompile -j$(JLEVEL)
+	$(SILENT) $(MAKE) $(MAKEPARAMS) -C $(PROJECTDIR)/$(MAKETYPE)-nto-aarch64-le config=$(CONFIG)64 -j$(JLEVEL)
 
 #-------------------------------------------------
 # gmake-linux-clang

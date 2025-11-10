@@ -36,6 +36,7 @@
 #define BX_CRT_MINGW  0
 #define BX_CRT_MSVC   0
 #define BX_CRT_NEWLIB 0
+#define BX_CRT_QNX    0
 
 #ifndef BX_CRT_NONE
 #	define BX_CRT_NONE 0
@@ -59,6 +60,7 @@
 #define BX_PLATFORM_OSX        0
 #define BX_PLATFORM_PS4        0
 #define BX_PLATFORM_PS5        0
+#define BX_PLATFORM_QNX        0
 #define BX_PLATFORM_RPI        0
 #define BX_PLATFORM_WINDOWS    0
 #define BX_PLATFORM_WINRT      0
@@ -193,6 +195,9 @@
 #elif  defined(__linux__)
 #	undef  BX_PLATFORM_LINUX
 #	define BX_PLATFORM_LINUX 1
+#elif  defined(__QNX__)
+#	undef  BX_PLATFORM_QNX
+#	define BX_PLATFORM_QNX 1
 #elif  defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) \
 	|| defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__)
 #	undef  BX_PLATFORM_IOS
@@ -247,6 +252,9 @@
 #	elif BX_PLATFORM_BSD
 #		undef  BX_CRT_BSD
 #		define BX_CRT_BSD 1
+#	elif BX_PLATFORM_QNX
+#		undef  BX_CRT_QNX
+#		define BX_CRT_QNX 1
 #	endif //
 
 #	if !BX_CRT_BIONIC \
@@ -255,6 +263,7 @@
 	&& !BX_CRT_LIBCXX \
 	&& !BX_CRT_MINGW  \
 	&& !BX_CRT_MSVC   \
+	&& !BX_CRT_QNX    \
 	&& !BX_CRT_NEWLIB
 #		undef  BX_CRT_NONE
 #		define BX_CRT_NONE 1
@@ -274,6 +283,7 @@
 	||  BX_PLATFORM_OSX        \
 	||  BX_PLATFORM_PS4        \
 	||  BX_PLATFORM_PS5        \
+	||  BX_PLATFORM_QNX        \
 	||  BX_PLATFORM_RPI        \
 	)
 
@@ -290,6 +300,7 @@
 	||  BX_PLATFORM_OSX        \
 	||  BX_PLATFORM_PS4        \
 	||  BX_PLATFORM_PS5        \
+	||  BX_PLATFORM_QNX        \
 	||  BX_PLATFORM_RPI        \
 	||  BX_PLATFORM_WINDOWS    \
 	||  BX_PLATFORM_WINRT      \
@@ -392,6 +403,8 @@
 #	define BX_PLATFORM_NAME "PlayStation 4"
 #elif BX_PLATFORM_PS5
 #	define BX_PLATFORM_NAME "PlayStation 5"
+#elif BX_PLATFORM_QNX
+#	define BX_PLATFORM_NAME "QNX"
 #elif BX_PLATFORM_RPI
 #	define BX_PLATFORM_NAME "RaspberryPi"
 #elif BX_PLATFORM_WINDOWS
@@ -432,6 +445,8 @@
 #	define BX_CRT_NAME "Clang C Library"
 #elif BX_CRT_NEWLIB
 #	define BX_CRT_NAME "Newlib"
+#elif BX_CRT_QNX
+#	define BX_CRT_NAME "QNX C Library"
 #elif BX_CRT_NONE
 #	define BX_CRT_NAME "None"
 #else

@@ -222,7 +222,11 @@ bool z180_device::get_tend1()
 #define _PC     m_PC.w.l
 
 #define _SPD    m_SP.d
+#ifndef __QNX__
 #define _SP     m_SP.w.l
+#else
+#define MAME_SP     m_SP.w.l
+#endif
 
 #define _AFD    m_AF.d
 #define _AF     m_AF.w.l

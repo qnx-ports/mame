@@ -287,10 +287,14 @@ function osdmodulesbuild()
 		MAME_DIR .. "3rdparty/bgfx/examples/common",
 		MAME_DIR .. "3rdparty/bgfx/include",
 		MAME_DIR .. "3rdparty/bgfx/3rdparty",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/khronos",
 		MAME_DIR .. "3rdparty/bx/include",
 		ext_includedir("rapidjson")
 	}
+	if not _OPTIONS["targetos"]=="qnx" then
+		includedirs {
+			MAME_DIR .. "3rdparty/bgfx/3rdparty/khronos",
+		}
+	end
 
 	if _OPTIONS["NO_USE_PORTAUDIO"]=="1" then
 		defines {
@@ -624,7 +628,7 @@ newoption {
 }
 
 if not _OPTIONS["NO_OPENGL"] then
-	if _OPTIONS["targetos"] == "android" then
+	if _OPTIONS["targetos"] == "android" or _OPTIONS["targetos"] == "qnx" then
 		_OPTIONS["NO_OPENGL"] = "1"
 	else
 		_OPTIONS["NO_OPENGL"] = "0"

@@ -154,6 +154,7 @@ newoption {
 		{ "windows",       "Windows"                },
 		{ "haiku",         "Haiku"                  },
 		{ "solaris",       "Solaris SunOS"          },
+		{ "qnx",           "QNX"                    },
 	},
 }
 
@@ -711,9 +712,6 @@ local version = str_to_version(_OPTIONS["gcc_version"])
 		"-std=c++17",
 	}
 -- this speeds it up a bit by piping between the preprocessor/compiler/assembler
-	buildoptions {
-		"-pipe",
-	}
 -- add -g if we need symbols, and ensure we have frame pointers
 if _OPTIONS["SYMBOLS"]~=nil and _OPTIONS["SYMBOLS"]~="0" then
 	buildoptions {
@@ -894,6 +892,11 @@ end
 
 
 if _OPTIONS["OPENMP"]=="1" then
+	if _OPTIONS["targetos"]=="qnx" then
+		buildoptions {
+			"-lgomp"
+		}
+	end
 	buildoptions {
 		"-fopenmp",
 	}
@@ -1180,7 +1183,6 @@ configuration { "linux-*" }
 			"LinkSupportCircularDependencies",
 		}
 
-
 configuration { "freebsd or netbsd" }
 		flags {
 			"LinkSupportCircularDependencies",
@@ -1190,6 +1192,8 @@ configuration { "osx*" }
 		links {
 			"pthread",
 		}
+
+configuration { "qnx*" }
 
 configuration { "mingw*" }
 		if _OPTIONS["osd"]=="sdl" then

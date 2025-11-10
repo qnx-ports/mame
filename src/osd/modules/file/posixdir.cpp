@@ -69,7 +69,7 @@ constexpr char PATHSEPCH = '\\';
 constexpr char PATHSEPCH = '/';
 #endif
 
-#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__DragonFly__) || defined(__EMSCRIPTEN__) || defined(__ANDROID__) || defined(_WIN32) || defined(SDLMAME_NO64BITIO)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__DragonFly__) || defined(__EMSCRIPTEN__) || defined(__ANDROID__) || defined(_WIN32) || defined(__QNX__) || defined(SDLMAME_NO64BITIO)
 using sdl_dirent = struct dirent;
 using sdl_stat = struct stat;
 #define sdl_readdir readdir
@@ -159,7 +159,30 @@ const osd::directory::entry *posix_directory::read()
 	sdl_stat st;
 	bool stat_err(0 > sdl_stat_fn(util::string_format("%s%c%s", m_path, PATHSEPCH, static_cast<const char *>(m_data->d_name)).c_str(), &st));
 
-#if HAS_DT_XXX
+#ifdef __QNX__
+	struct dirent_extra *dex;
+	for (dex = _DEXTRA_FIRST(m_data); _DEXTRA_VALID(dex, m_data);
+		 dex = _DEXTRA_NEXT(dex) ) {
+		switch (dex->d_type) {
+		case _DTYPE_STAT:
+		case _DTYPE_LSTAT:
+			struct dirent_extra_stat *dex_stat;
+			dex_stat = (struct dirent_extra_stat *) dex;
+
+			// TODO: Properly handle links to dirs.
+			if (S_ISDIR(dex_stat->d_stat.st_mode)) {
+				m_entry.type = entry::entry_type::DIR;
+			} else if (S_ISREG(dex_stat->d_stat.st_mode)) {
+				m_entry.type = entry::entry_type::FILE;
+			} else {
+				m_entry.type = entry::entry_type::OTHER;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+#elif HAS_DT_XXX
 	switch (m_data->d_type)
 	{
 	case DT_DIR:

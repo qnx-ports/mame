@@ -30,9 +30,14 @@ function maintargetosdoptions(_target,_subtarget)
 			"Xinerama",
 		}
 	else
-		if _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="openbsd" then
+		if _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="openbsd" or _OPTIONS["targetos"]=="qnx" then
 			links {
 				"EGL",
+			}
+		end
+		if _OPTIONS["targetos"]=="qnx" then
+			links {
+				"GLESv2",
 			}
 		end
 	end
@@ -90,6 +95,10 @@ function maintargetosdoptions(_target,_subtarget)
 		links {
 			"network",
 			"bsd",
+		}
+	elseif _OPTIONS["targetos"]=="qnx" then
+		links {
+			"socket"
 		}
 	end
 
@@ -270,14 +279,20 @@ if BASE_TARGETOS=="unix" then
 		if _OPTIONS["targetos"]~="haiku" and _OPTIONS["targetos"]~="android" then
 			links {
 				"m",
-				"pthread",
 			}
+
+			if _OPTIONS["targetos"]~="qnx" then
+				links {
+					"pthread",
+				}
+			end
+
 			if _OPTIONS["targetos"]=="solaris" then
 				links {
 					"socket",
 					"nsl",
 				}
-			elseif _OPTIONS["targetos"]~="asmjs" then
+			elseif _OPTIONS["targetos"]~="asmjs" and _OPTIONS["targetos"]~="qnx" then
 				links {
 					"util",
 				}

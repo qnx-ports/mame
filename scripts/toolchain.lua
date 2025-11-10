@@ -34,6 +34,8 @@ newoption {
 		{ "osx",           "OSX (GCC compiler)"     },
 		{ "osx-clang",     "OSX (Clang compiler)"   },
 		{ "solaris",       "Solaris"                },
+		{ "qnx-x64",       "QNX QCC - x64"          },
+		{ "qnx-arm64",     "QNX QCC - arm64"        },
 	},
 }
 
@@ -155,6 +157,22 @@ function toolchain(_buildDir, _subDir)
 			premake.gcc.cxx = "clang++"
 			premake.gcc.ar  = "ar"
 			location (_buildDir .. "projects/" .. _subDir .. "/".. _ACTION .. "-linux-clang")
+		end
+
+		if "qnx-x64" == _OPTIONS["gcc"] then
+			premake.gcc.cc            = "ntox86_64-gcc"
+			premake.gcc.cxx           = "ntox86_64-g++"
+			premake.gcc.ar            = "ntox86_64-ar"
+			premake.gcc.ranlib        = "ntox86_64-ranlib"
+			location (_buildDir .. "projects/" .. _subDir .. "/".. _ACTION .. "-nto-x86_64-o")
+		end
+
+		if "qnx-arm64" == _OPTIONS["gcc"] then
+			premake.gcc.cc  = "ntoaarch64-gcc"
+			premake.gcc.cxx = "ntoaarch64-g++"
+			premake.gcc.ar  = "ntoaarch64-ar"
+			premake.gcc.ranlib  = "ntoaarch64-ranlib"
+			location (_buildDir .. "projects/" .. _subDir .. "/".. _ACTION .. "-nto-aarch64-le")
 		end
 
 		if "mingw32-gcc" == _OPTIONS["gcc"] then
@@ -381,6 +399,24 @@ function toolchain(_buildDir, _subDir)
 		buildoptions {
 			"-m32",
 		}
+
+	configuration { "qnx-x64", "x64" }
+		objdir (_buildDir .. "qnx_x64" .. "/obj")
+
+	configuration { "qnx-x64", "x64", "Release" }
+		targetdir (_buildDir .. "qnx_x64" .. "/bin/x64/Release")
+
+	configuration { "qnx-x64", "x64", "Debug" }
+		targetdir (_buildDir .. "qnx_x64" .. "/bin/x64/Debug")
+
+	configuration { "qnx-arm64", "arm64" }
+		objdir (_buildDir .. "qnx_arm64" .. "/obj")
+
+	configuration { "qnx-arm64", "arm64", "Release" }
+		targetdir (_buildDir .. "qnx_arm64" .. "/bin/arm64/Release")
+
+	configuration { "qnx-arm64", "arm64", "Debug" }
+		targetdir (_buildDir .. "qnx_arm64" .. "/bin/arm64/Debug")
 
 	configuration { "solaris", "x32", "Release" }
 		targetdir (_buildDir .. "solaris" .. "/bin/x32/Release")
@@ -624,6 +660,12 @@ function strip()
 		postbuildcommands {
 			"$(SILENT) echo Stripping symbols.",
 			"$(SILENT) strip -s \"$(TARGET)\""
+		}
+
+	configuration { "qnx-*" }
+		postbuildcommands {
+			"$(SILENT) echo Stripping symbols.",
+			"$(SILENT) strip -s \"$(TARGET)\"",
 		}
 
 	configuration { "mingw*", "x64" }

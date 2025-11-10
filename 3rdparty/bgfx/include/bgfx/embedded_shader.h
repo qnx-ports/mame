@@ -34,6 +34,7 @@
 	)
 #define BGFX_PLATFORM_SUPPORTS_ESSL (0  \
 	|| BX_PLATFORM_ANDROID              \
+	|| BX_PLATFORM_QNX                  \
 	|| BX_PLATFORM_EMSCRIPTEN           \
 	|| BX_PLATFORM_IOS                  \
 	|| BX_PLATFORM_LINUX                \

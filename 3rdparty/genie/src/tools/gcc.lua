@@ -73,7 +73,7 @@
 		},
 		x64 = {
 			cppflags = "-MMD -MP",
-			flags    = "-m64",
+--			flags    = "-m64",
 		},
 		Universal = {
 			ar       = "libtool",

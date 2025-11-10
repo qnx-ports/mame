@@ -25,7 +25,8 @@
 	|| BX_PLATFORM_HAIKU     \
 	|| BX_PLATFORM_IOS       \
 	|| BX_PLATFORM_OSX       \
-	|| BX_PLATFORM_PS4
+	|| BX_PLATFORM_PS4       \
+	|| BX_PLATFORM_QNX
 #		include <pthread.h> // mach_port_t
 #	endif // BX_PLATFORM_*
 
@@ -34,6 +35,10 @@
 #		include <dlfcn.h> // dlopen, dlclose, dlsym
 #	endif // !BX_PLATFORM_PS4
 
+#	if BX_PLATFORM_QNX
+#		include <string.h> // strstr
+#   endif
+
 #	if BX_PLATFORM_ANDROID
 #		include <malloc.h> // mallinfo
 #	elif   BX_PLATFORM_LINUX     \
@@ -41,7 +46,8 @@
 #		include <stdio.h>  // fopen
 #		include <unistd.h> // syscall
 #		include <sys/syscall.h>
-#	elif   BX_PLATFORM_HAIKU
+#	elif   BX_PLATFORM_HAIKU     \
+		|| BX_PLATFORM_QNX
 #		include <stdio.h>  // fopen
 #		include <unistd.h> // syscall
 #	elif BX_PLATFORM_OSX
@@ -98,6 +104,7 @@ namespace bx
 #elif BX_PLATFORM_BSD
 		return *(uint32_t*)::pthread_self();
 #elif BX_PLATFORM_HURD
+	|| BX_PLATFORM_QNX
 		return (pthread_t)::pthread_self();
 #else
 		debugOutput("getTid is not implemented"); debugBreak();
@@ -151,6 +158,41 @@ namespace bx
 		}
 
 		return info.resident_size;
+#elif BX_PLATFORM_QNX
+		const size_t buff_sz = 512;
+		char buffer[buff_sz];
+		char *pos;
+
+		size_t mem = 0;
+		int items;
+
+		FILE* file = fopen("/proc/self/vmstat", "r");
+		if (NULL == file)
+		{
+			return 0;
+		}
+
+		// Find map_size in output.
+		do {
+			char *ret = fgets(buffer, buff_sz, file);
+			if (ret == NULL && !feof(file)) {
+				goto FAIL;
+			}
+			// FIXME: Use defs from bx/string.h
+			// i.e. strFind + getTerm
+		} while ((pos = strstr(buffer, "as_stats.map_size=")) == NULL);
+		fclose(file);
+		pos += 18;
+
+		items = sscanf(pos, "%16lx", &mem);
+
+		return 1 == items
+			? mem
+			: 0
+			;
+	FAIL:
+		fclose(file);
+		return 0;
 #elif BX_PLATFORM_WINDOWS
 		PROCESS_MEMORY_COUNTERS pmc;
 		GetProcessMemoryInfo(GetCurrentProcess()
@@ -311,7 +353,8 @@ namespace bx
 	void* exec(const char* const* _argv)
 	{
 #if BX_PLATFORM_LINUX \
- || BX_PLATFORM_HURD
+ || BX_PLATFORM_HURD \
+ || BX_PLATFORM_QNX
 		pid_t pid = fork();
 
 		if (0 == pid)

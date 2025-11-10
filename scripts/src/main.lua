@@ -38,6 +38,12 @@ end
 			"GLESv2",
 			"SDL2",
 		}
+	configuration { "qnx*" }
+		links {
+			"EGL",
+			"GLESv2",
+			"SDL2",
+		}
 
 	configuration {  }
 
@@ -124,15 +130,15 @@ end
 if (STANDALONE~=true) then
 	findfunction("linkProjects_" .. _OPTIONS["target"] .. "_" .. _OPTIONS["subtarget"])(_OPTIONS["target"], _OPTIONS["subtarget"])
 end
+	links {
+		"optional",
+		"emu",
+	}
 if (STANDALONE~=true) then
 	links {
 		"frontend",
 	}
 end
-	links {
-		"optional",
-		"emu",
-	}
 	links {
 		"osd_" .. _OPTIONS["osd"],
 	}
@@ -209,6 +215,11 @@ end
 		"bx",
 		"ocore_" .. _OPTIONS["osd"],
 	}
+	if _OPTIONS["targetos"]=="qnx" then
+		links {
+			"screen",
+		}
+	end
 
 	override_resources = false;
 

@@ -1251,9 +1251,10 @@ end
 			MAME_DIR .. "3rdparty/portmidi/porttime/ptlinux.c",
 		}
 	end
-	if _OPTIONS["targetos"]=="netbsd" then
+	if _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="qnx" then
 		files {
 			MAME_DIR .. "3rdparty/portmidi/pm_linux/pmlinux.c",
+			MAME_DIR .. "3rdparty/portmidi/pm_linux/pmlinuxnull.c",
 			MAME_DIR .. "3rdparty/portmidi/pm_linux/finddefault.c",
 			MAME_DIR .. "3rdparty/portmidi/porttime/ptlinux.c",
 		}
@@ -1319,6 +1320,7 @@ project "bx"
 			MAME_DIR .. "3rdparty/bx/include/compat/linux",
 		}
 
+	-- FIXME?
 	configuration { }
 
 	if _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="asmjs" then
@@ -1530,8 +1532,19 @@ end
 		MAME_DIR .. "3rdparty/bx/include",
 		MAME_DIR .. "3rdparty/bimg/include",
 		MAME_DIR .. "3rdparty/bgfx/3rdparty/directx-headers/include/directx",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/khronos",
 	}
+
+	if not _OPTIONS["targetos"]=="qnx" then
+		includedirs {
+			MAME_DIR .. "3rdparty/bgfx/3rdparty/khronos",
+		}
+	else
+		links {
+			"GLESv2",
+			"EGL",
+			"screen",
+		}
+	end
 
 	configuration { "android-*"}
 		buildoptions {
@@ -1625,7 +1638,7 @@ end
 		"BGFX_CONFIG_MAX_FRAME_BUFFERS=128",
 	}
 
-	if _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="openbsd" then
+	if _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="openbsd" or _OPTIONS["targetos"] == "qnx" then
 		if _OPTIONS["NO_X11"]=="1" then
 			defines {
 				"BGFX_CONFIG_RENDERER_OPENGLES=1",

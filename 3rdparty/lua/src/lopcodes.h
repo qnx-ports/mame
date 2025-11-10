@@ -35,21 +35,21 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 /*
 ** size and position of opcode arguments.
 */
-#define SIZE_C		8
-#define SIZE_B		8
-#define SIZE_Bx		(SIZE_C + SIZE_B + 1)
-#define SIZE_A		8
-#define SIZE_Ax		(SIZE_Bx + SIZE_A)
-#define SIZE_sJ		(SIZE_Bx + SIZE_A)
+#define LUA_SIZE_C		8
+#define LUA_SIZE_B		8
+#define LUA_SIZE_Bx		(LUA_SIZE_C + LUA_SIZE_B + 1)
+#define LUA_SIZE_A		8
+#define LUA_SIZE_Ax		(LUA_SIZE_Bx + LUA_SIZE_A)
+#define LUA_SIZE_sJ		(LUA_SIZE_Bx + LUA_SIZE_A)
 
-#define SIZE_OP		7
+#define LUA_SIZE_OP		7
 
 #define POS_OP		0
 
-#define POS_A		(POS_OP + SIZE_OP)
-#define POS_k		(POS_A + SIZE_A)
+#define POS_A		(POS_OP + LUA_SIZE_OP)
+#define POS_k		(POS_A + LUA_SIZE_A)
 #define POS_B		(POS_k + 1)
-#define POS_C		(POS_B + SIZE_B)
+#define POS_C		(POS_B + LUA_SIZE_B)
 
 #define POS_Bx		POS_k
 
@@ -68,8 +68,8 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #define L_INTHASBITS(b)		((UINT_MAX >> ((b) - 1)) >= 1)
 
 
-#if L_INTHASBITS(SIZE_Bx)
-#define MAXARG_Bx	((1<<SIZE_Bx)-1)
+#if L_INTHASBITS(LUA_SIZE_Bx)
+#define MAXARG_Bx	((1<<LUA_SIZE_Bx)-1)
 #else
 #define MAXARG_Bx	MAX_INT
 #endif
@@ -77,14 +77,14 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #define OFFSET_sBx	(MAXARG_Bx>>1)         /* 'sBx' is signed */
 
 
-#if L_INTHASBITS(SIZE_Ax)
-#define MAXARG_Ax	((1<<SIZE_Ax)-1)
+#if L_INTHASBITS(LUA_SIZE_Ax)
+#define MAXARG_Ax	((1<<LUA_SIZE_Ax)-1)
 #else
 #define MAXARG_Ax	MAX_INT
 #endif
 
-#if L_INTHASBITS(SIZE_sJ)
-#define MAXARG_sJ	((1 << SIZE_sJ) - 1)
+#if L_INTHASBITS(LUA_SIZE_sJ)
+#define MAXARG_sJ	((1 << LUA_SIZE_sJ) - 1)
 #else
 #define MAXARG_sJ	MAX_INT
 #endif
@@ -92,9 +92,9 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #define OFFSET_sJ	(MAXARG_sJ >> 1)
 
 
-#define MAXARG_A	((1<<SIZE_A)-1)
-#define MAXARG_B	((1<<SIZE_B)-1)
-#define MAXARG_C	((1<<SIZE_C)-1)
+#define MAXARG_A	((1<<LUA_SIZE_A)-1)
+#define MAXARG_B	((1<<LUA_SIZE_B)-1)
+#define MAXARG_C	((1<<LUA_SIZE_C)-1)
 #define OFFSET_sC	(MAXARG_C >> 1)
 
 #define int2sC(i)	((i) + OFFSET_sC)
@@ -111,9 +111,9 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 ** the following macros help to manipulate instructions
 */
 
-#define GET_OPCODE(i)	(cast(OpCode, ((i)>>POS_OP) & MASK1(SIZE_OP,0)))
-#define SET_OPCODE(i,o)	((i) = (((i)&MASK0(SIZE_OP,POS_OP)) | \
-		((cast(Instruction, o)<<POS_OP)&MASK1(SIZE_OP,POS_OP))))
+#define GET_OPCODE(i)	(cast(OpCode, ((i)>>POS_OP) & MASK1(LUA_SIZE_OP,0)))
+#define SET_OPCODE(i,o)	((i) = (((i)&MASK0(LUA_SIZE_OP,POS_OP)) | \
+		((cast(Instruction, o)<<POS_OP)&MASK1(LUA_SIZE_OP,POS_OP))))
 
 #define checkopm(i,m)	(getOpMode(GET_OPCODE(i)) == m)
 
@@ -122,35 +122,35 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #define setarg(i,v,pos,size)	((i) = (((i)&MASK0(size,pos)) | \
                 ((cast(Instruction, v)<<pos)&MASK1(size,pos))))
 
-#define GETARG_A(i)	getarg(i, POS_A, SIZE_A)
-#define SETARG_A(i,v)	setarg(i, v, POS_A, SIZE_A)
+#define GETARG_A(i)	getarg(i, POS_A, LUA_SIZE_A)
+#define SETARG_A(i,v)	setarg(i, v, POS_A, LUA_SIZE_A)
 
-#define GETARG_B(i)	check_exp(checkopm(i, iABC), getarg(i, POS_B, SIZE_B))
+#define GETARG_B(i)	check_exp(checkopm(i, iABC), getarg(i, POS_B, LUA_SIZE_B))
 #define GETARG_sB(i)	sC2int(GETARG_B(i))
-#define SETARG_B(i,v)	setarg(i, v, POS_B, SIZE_B)
+#define SETARG_B(i,v)	setarg(i, v, POS_B, LUA_SIZE_B)
 
-#define GETARG_C(i)	check_exp(checkopm(i, iABC), getarg(i, POS_C, SIZE_C))
+#define GETARG_C(i)	check_exp(checkopm(i, iABC), getarg(i, POS_C, LUA_SIZE_C))
 #define GETARG_sC(i)	sC2int(GETARG_C(i))
-#define SETARG_C(i,v)	setarg(i, v, POS_C, SIZE_C)
+#define SETARG_C(i,v)	setarg(i, v, POS_C, LUA_SIZE_C)
 
 #define TESTARG_k(i)	check_exp(checkopm(i, iABC), (cast_int(((i) & (1u << POS_k)))))
 #define GETARG_k(i)	check_exp(checkopm(i, iABC), getarg(i, POS_k, 1))
 #define SETARG_k(i,v)	setarg(i, v, POS_k, 1)
 
-#define GETARG_Bx(i)	check_exp(checkopm(i, iABx), getarg(i, POS_Bx, SIZE_Bx))
-#define SETARG_Bx(i,v)	setarg(i, v, POS_Bx, SIZE_Bx)
+#define GETARG_Bx(i)	check_exp(checkopm(i, iABx), getarg(i, POS_Bx, LUA_SIZE_Bx))
+#define SETARG_Bx(i,v)	setarg(i, v, POS_Bx, LUA_SIZE_Bx)
 
-#define GETARG_Ax(i)	check_exp(checkopm(i, iAx), getarg(i, POS_Ax, SIZE_Ax))
-#define SETARG_Ax(i,v)	setarg(i, v, POS_Ax, SIZE_Ax)
+#define GETARG_Ax(i)	check_exp(checkopm(i, iAx), getarg(i, POS_Ax, LUA_SIZE_Ax))
+#define SETARG_Ax(i,v)	setarg(i, v, POS_Ax, LUA_SIZE_Ax)
 
 #define GETARG_sBx(i)  \
-	check_exp(checkopm(i, iAsBx), getarg(i, POS_Bx, SIZE_Bx) - OFFSET_sBx)
+	check_exp(checkopm(i, iAsBx), getarg(i, POS_Bx, LUA_SIZE_Bx) - OFFSET_sBx)
 #define SETARG_sBx(i,b)	SETARG_Bx((i),cast_uint((b)+OFFSET_sBx))
 
 #define GETARG_sJ(i)  \
-	check_exp(checkopm(i, isJ), getarg(i, POS_sJ, SIZE_sJ) - OFFSET_sJ)
+	check_exp(checkopm(i, isJ), getarg(i, POS_sJ, LUA_SIZE_sJ) - OFFSET_sJ)
 #define SETARG_sJ(i,j) \
-	setarg(i, cast_uint((j)+OFFSET_sJ), POS_sJ, SIZE_sJ)
+	setarg(i, cast_uint((j)+OFFSET_sJ), POS_sJ, LUA_SIZE_sJ)
 
 
 #define CREATE_ABCk(o,a,b,c,k)	((cast(Instruction, o)<<POS_OP) \

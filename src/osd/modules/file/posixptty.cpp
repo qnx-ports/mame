@@ -25,6 +25,10 @@
 #elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 #include <termios.h>
 #include <util.h>
+#elif defined(__QNX__)
+#include <unix.h>
+#include <termios.h>
+#include <sys/ioctl.h>
 #elif defined(__linux__) || defined(__EMSCRIPTEN__)
 #include <pty.h>
 #elif defined(__HAIKU__)
@@ -182,7 +186,7 @@ std::error_condition posix_open_ptty(std::uint32_t openflags, osd_file::ptr &fil
 		::close(masterfd);
 		return std::error_condition(result, std::generic_category());
 	}
-#elif defined(__linux__) || defined(__FreeBSD__)
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__QNX__)
 	// ptsname_r is present but there's no maximum length defined
 	if (::openpty(&masterfd, &slavefd, nullptr, &tios, nullptr) < 0)
 		return std::error_condition(errno, std::generic_category());

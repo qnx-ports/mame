@@ -58,9 +58,17 @@ OP(op,2e) { _L = ARG();                                           } /* LD   L,n 
 OP(op,2f) { _A ^= 0xff; _F = (_F&(SF|ZF|PF|CF))|HF|NF|(_A&(YF|XF)); } /* CPL              */
 
 OP(op,30) { JR_COND( !(_F & CF), 0x30 );                          } /* JR   NC,o        */
+#ifndef __QNX__
 OP(op,31) { _SP = ARG16();                                            } /* LD   SP,w        */
+#else
+OP(op,31) { MAME_SP = ARG16();                                            } /* LD   SP,w        */
+#endif
 OP(op,32) { m_ea = ARG16(); WM( m_ea, _A );                             } /* LD   (w),A       */
+#ifndef __QNX__
 OP(op,33) { _SP++;                                                    } /* INC  SP          */
+#else
+OP(op,33) { MAME_SP++;                                                    } /* INC  SP          */
+#endif
 OP(op,34) { WM( _HL, INC(RM(_HL)) );                              } /* INC  (HL)        */
 OP(op,35) { WM( _HL, DEC(RM(_HL)) );                              } /* DEC  (HL)        */
 OP(op,36) { WM( _HL, ARG() );                                       } /* LD   (HL),n      */
@@ -69,7 +77,11 @@ OP(op,37) { _F = (_F & (SF|ZF|PF)) | CF | (_A & (YF|XF));         } /* SCF      
 OP(op,38) { JR_COND( _F & CF, 0x38 );                             } /* JR   C,o         */
 OP(op,39) { ADD16(HL,SP);                                           } /* ADD  HL,SP       */
 OP(op,3a) { m_ea = ARG16(); _A = RM( m_ea );                            } /* LD   A,(w)       */
+#ifndef __QNX__
 OP(op,3b) { _SP--;                                                    } /* DEC  SP          */
+#else
+OP(op,3b) { MAME_SP--;                                                    } /* DEC  SP          */
+#endif
 OP(op,3c) { _A = INC(_A);                                         } /* INC  A           */
 OP(op,3d) { _A = DEC(_A);                                         } /* DEC  A           */
 OP(op,3e) { _A = ARG();                                           } /* LD   A,n         */
@@ -284,7 +296,11 @@ OP(op,f6) { OR(ARG());                                              } /* OR   n 
 OP(op,f7) { RST(0x30);                                              } /* RST  6           */
 
 OP(op,f8) { RET_COND( _F & SF, 0xf8 );                                } /* RET  M           */
+#ifndef __QNX__
 OP(op,f9) { _SP = _HL;                                              } /* LD   SP,HL       */
+#else
+OP(op,f9) { MAME_SP = _HL;                                              } /* LD   SP,HL       */
+#endif
 OP(op,fa) { JP_COND(_F & SF);                                     } /* JP   M,a         */
 OP(op,fb) { EI;                                                     } /* EI               */
 OP(op,fc) { CALL_COND( _F & SF, 0xfc );                           } /* CALL M,a         */

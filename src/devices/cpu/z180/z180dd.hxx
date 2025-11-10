@@ -289,7 +289,11 @@ OP(dd,f6) { illegal_1(); op_f6();                                   } /* DB   DD
 OP(dd,f7) { illegal_1(); op_f7();                                   } /* DB   DD          */
 
 OP(dd,f8) { illegal_1(); op_f8();                                   } /* DB   DD          */
+#ifndef __QNX__
 OP(dd,f9) { m_R++; _SP = _IX;                                       } /* LD   SP,IX       */
+#else
+OP(dd,f9) { m_R++; MAME_SP = _IX;                                       } /* LD   SP,IX       */
+#endif
 OP(dd,fa) { illegal_1(); op_fa();                                   } /* DB   DD          */
 OP(dd,fb) { illegal_1(); op_fb();                                   } /* DB   DD          */
 OP(dd,fc) { illegal_1(); op_fc();                                   } /* DB   DD          */

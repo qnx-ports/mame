@@ -35,6 +35,11 @@
 # include <cstddef>
 #endif // defined(__has_include)
 
+// Need to include unistd.h here for thread support.
+#if defined(__QNX__)
+#include <unistd.h>
+#endif
+
 // boostify: non-boost code ends here
 #if defined(ASIO_STANDALONE)
 # define ASIO_DISABLE_BOOST_ALIGN 1

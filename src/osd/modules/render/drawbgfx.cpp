@@ -444,6 +444,12 @@ bool video_bgfx::set_platform_data(bgfx::PlatformData &platform_data, osd_window
 		platform_data.nwh = wmi.info.android.window;
 		break;
 #endif
+#if defined(SDL_VIDEO_DRIVER_QNX)
+	case SDL_SYSWM_QNX:
+		platform_data.ndt = nullptr;
+		platform_data.nwh = wmi.info.qnx.window;
+		break;
+#endif
 	default:
 		osd_printf_error("BGFX: Unsupported SDL window manager type %u\n", wmi.subsystem);
 		return false;
@@ -529,6 +535,10 @@ static std::pair<void *, bool> sdlNativeWindowHandle(SDL_Window *window)
 #if defined(SDL_VIDEO_DRIVER_ANDROID)
 	case SDL_SYSWM_ANDROID:
 		return std::make_pair(wmi.info.android.window, true);
+#endif
+#if defined(SDL_VIDEO_DRIVER_QNX)
+	case SDL_SYSWM_QNX:
+		return std::make_pair(wmi.info.qnx.window, true);
 #endif
 	default:
 		return std::make_pair(nullptr, false);

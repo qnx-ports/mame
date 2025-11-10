@@ -60,6 +60,8 @@ namespace entry
 		return wmi.info.win.window;
 #   elif BX_PLATFORM_ANDROID
 		return wmi.info.android.window;
+#   elif BX_PLATFORM_QNX
+		return wmi.info.qnx.window;
 #	endif // BX_PLATFORM_
 	}
 

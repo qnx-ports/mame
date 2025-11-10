@@ -15,6 +15,11 @@
 #			include <bcm_host.h>
 #		endif // BX_PLATFORM_RPI
 
+#	if BX_PLATFORM_QNX
+#		include <screen/screen.h>
+#		include <limits.h>
+#	endif
+
 namespace bgfx { namespace gl
 {
 #ifndef EGL_CONTEXT_FLAG_NO_ERROR_BIT_KHR
@@ -71,7 +76,7 @@ EGL_IMPORT
 	void* eglOpen()
 	{
 	    void* handle = bx::dlopen(
-#if BX_PLATFORM_LINUX
+#if BX_PLATFORM_LINUX || BX_PLATFORM_QNX
 			"libEGL.so.1"
 #else
 			"libEGL." BX_DL_EXT
@@ -349,6 +354,19 @@ WL_EGL_IMPORT
 			eglGetConfigAttrib(m_display, m_config, EGL_NATIVE_VISUAL_ID, &format);
 			ANativeWindow_setBuffersGeometry( (ANativeWindow*)g_platformData.nwh, _width, _height, format);
 
+#	elif BX_PLATFORM_QNX
+
+			int size[2];
+
+			size[0] = (_width > INT_MAX) ? INT_MAX : static_cast<int>(_width);
+			size[1] = (_height > INT_MAX) ? INT_MAX : static_cast<int>(_height);
+			if (screen_set_window_property_iv(
+					*static_cast<screen_window_t *>(g_platformData.nwh),
+					SCREEN_PROPERTY_SIZE,
+					size) < 0) {
+				BGFX_FATAL(0, Fatal::UnableToInitialize, "screen_set_window_property_iv");
+			}
+
 #	elif BX_PLATFORM_RPI
 			DISPMANX_DISPLAY_HANDLE_T dispmanDisplay = vc_dispmanx_display_open(0);
 			DISPMANX_UPDATE_HANDLE_T  dispmanUpdate  = vc_dispmanx_update_start(0);
@@ -554,6 +572,7 @@ WL_EGL_IMPORT
 			| BX_PLATFORM_LINUX
 			| BX_PLATFORM_WINDOWS
 			| BX_PLATFORM_ANDROID
+			| BX_PLATFORM_QNX
 			)
 			? BGFX_CAPS_SWAP_CHAIN
 			: 0
