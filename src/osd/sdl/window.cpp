@@ -832,6 +832,15 @@ int sdl_window_info::complete_create()
 
 	// create the window .....
 
+#if defined(SDL_VIDEO_DRIVER_QNX)
+	// QNX SDL requires running video init first but doesn't use the driver_name
+	// argument.
+	if (SDL_VideoInit("") != 0) {
+		osd_printf_error("BGFX: Error initializing SDL video driver: %s\n", SDL_GetError());
+		return 1;
+	}
+#endif
+
 	/* FIXME: On Ubuntu and potentially other Linux OS you should use
 	 * to disable panning. This has to be done before every invocation of mame.
 	 *
