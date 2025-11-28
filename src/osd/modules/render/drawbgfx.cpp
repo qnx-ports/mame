@@ -169,7 +169,13 @@ public:
 	virtual std::unique_ptr<osd_renderer> create(osd_window &window) override;
 
 protected:
-	virtual unsigned flags() const override { return FLAG_INTERACTIVE; }
+	virtual unsigned flags() const override {
+#ifndef __QNX__
+		return FLAG_INTERACTIVE;
+#else
+		return FLAG_INTERACTIVE | FLAG_SDL_NEEDS_OPENGL;
+#endif
+	}
 
 private:
 	virtual void last_renderer_destroyed() override;
@@ -447,7 +453,7 @@ bool video_bgfx::set_platform_data(bgfx::PlatformData &platform_data, osd_window
 #if defined(SDL_VIDEO_DRIVER_QNX)
 	case SDL_SYSWM_QNX:
 		platform_data.ndt = nullptr;
-		platform_data.nwh = (void *)&wmi.info.qnx.window;
+		platform_data.nwh = (void *)wmi.info.qnx.window;
 		break;
 #endif
 	default:
@@ -511,8 +517,10 @@ static std::pair<void *, bool> sdlNativeWindowHandle(SDL_Window *window)
 {
 	SDL_SysWMinfo wmi;
 	SDL_VERSION(&wmi.version);
-	if (!SDL_GetWindowWMInfo(window, &wmi))
+	if (!SDL_GetWindowWMInfo(window, &wmi)) {
+		osd_printf_error("Failed to get window manager info from SDL.\n");
 		return std::make_pair(nullptr, false);
+	}
 
 	switch (wmi.subsystem)
 	{
@@ -643,6 +651,7 @@ int renderer_bgfx::create()
 		auto const [winhdl, success] = sdlNativeWindowHandle(dynamic_cast<sdl_window_info &>(window()).platform_window());
 		if (!success)
 		{
+			osd_printf_error("Failed to create an SDL window handle.\n");
 			m_targets.reset();
 			m_textures.reset();
 			return -1;
