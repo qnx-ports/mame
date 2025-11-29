@@ -42,7 +42,7 @@
 
 namespace {
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__QNX__)
 char const *const posix_ptty_identifier  = "/dev/pty";
 #else
 char const *const posix_ptty_identifier  = "/dev/pts";
