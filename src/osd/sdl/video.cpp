@@ -25,6 +25,10 @@
 
 #include <SDL2/SDL.h>
 
+#ifdef SDL_VIDEO_DRIVER_QNX
+#include <cstring>
+#endif
+
 
 //============================================================
 //  GLOBAL VARIABLES
@@ -53,6 +57,21 @@ bool sdl_osd_interface::video_init()
 
 	// we need the beam width in a float, contrary to what the core does.
 	video_config.beamwidth = options().beam_width_min();
+
+#if defined(SDL_VIDEO_DRIVER_QNX)
+	// QNX SDL requires running video init first but doesn't use the driver_name
+	// argument.
+	//
+	// Let us have custom behaviour for screen while still allowing a
+	// wayland backend.
+	if (strcmp(downcast<sdl_options &>(machine().options()).video_driver(), "qnx") == 0)
+	{
+		if (SDL_VideoInit("") != 0) {
+			osd_printf_error("BGFX: Error initializing SDL video driver: %s\n", SDL_GetError());
+			return 1;
+		}
+	}
+#endif
 
 	// initialize the window system so we can make windows
 	if (!window_init())
@@ -85,6 +104,12 @@ bool sdl_osd_interface::video_init()
 void sdl_osd_interface::video_exit()
 {
 	window_exit();
+#ifdef SDL_VIDEO_DRIVER_QNX
+	if (strcmp(downcast<sdl_options &>(machine().options()).video_driver(), "qnx") == 0)
+	{
+		SDL_VideoQuit();
+	}
+#endif
 }
 
 //============================================================
